@@ -1,7 +1,9 @@
 from django.shortcuts import render
 from django.views.generic import FormView
 from django.contrib import messages
-from django.shortcuts import redirect, reverse
+from django.shortcuts import redirect
+from django.urls import reverse_lazy
+
 
 from . import forms
 
@@ -11,7 +13,22 @@ class SignUpView(FormView):
 
     def form_valid(self, form):
         request = self.request
-        form.save(commit=True)
+        user = form.save(commit=True)
         messages.success(
-            request, 'You are signed up. To activate the account, follow the link sent to the mail.')
-        return redirect(reverse('accounts:signup'))
+            request, 'You are signed up.')
+        return redirect(reverse_lazy('accounts:info', args=[user.user_type]))
+
+class Information(FormView):
+    template_name = 'accounts/info.html'
+    success_url = 'discount:index'
+
+    def get_form_class(self):
+        user_type = self.kwargs['user_type']
+        if forms.StudentForm.match_code(user_type):
+            return forms.StudentForm
+        if forms.ParentForm.match_code(user_type):
+            return forms.ParentForm
+        if forms.SchoolForm.match_code(user_type):
+            return forms.SchoolForm
+        if forms.OperatorForm.match_code(user_type):
+            return forms.OperatorForm
