@@ -40,7 +40,7 @@ class Student(CustomerModel):
     national_code = models.IntegerField(_('national code'), blank=False)
 
     class Meta:
-        permissions = [('student_discount', 'Student discount')]
+        permissions = [('use_discount', 'Use discount')]
 
     @staticmethod
     def get_code():

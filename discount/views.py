@@ -17,6 +17,15 @@ class DiscountPerm(LoginRequiredMixin):
 
         return super().dispatch(request, *args, **kwargs)
 
+class UseDiscoutPerm(LoginRequiredMixin):
+    def dispatch(self, request, *args, **kwargs):
+        user = User.objects.get(username=request.user) 
+        if not user.has_perm('accounts.can_use_discount'):
+            # return redirect(reverse_lazy('discount:index'))
+            pass
+
+        return super().dispatch(request, *args, **kwargs)
+
 class Discount(DiscountPerm, TemplateView):
     precent_form = forms.PrecentDiscountForm
     amount_form = forms.AmountDiscountForm
@@ -45,3 +54,27 @@ class Discount(DiscountPerm, TemplateView):
     def get(self, request, *args, **kwargs):
         return self.post(request, *args, **kwargs)
     
+class UseDiscount(UseDiscoutPerm, TemplateView):
+    precent_form = forms.PrecentUseDiscountForm
+    amount_form = forms.AmountUseDiscountForm
+    template_name = 'discount/use_discount.html'
+
+    def post(self, request):
+        post_data = request.POST or None
+        precent_form = self.precent_form(post_data, prefix='precent')
+        amount_form = self.amount_form(post_data, prefix='amount')
+
+        context = self.get_context_data(precent_form=precent_form, amount_form=amount_form)
+
+        if precent_form.is_valid():
+            self.form_save(precent_form)
+        if amount_form.is_valid():
+            self.form_save(amount_form)
+
+        return self.render_to_response(context)
+    
+    def form_save(self, form):
+        return form.save(user=User.objects.get(username=self.request.user), commit=True)
+
+    def get(self, request, *args, **kwargs):
+        return self.post(request, *args, **kwargs)

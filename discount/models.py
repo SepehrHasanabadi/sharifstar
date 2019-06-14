@@ -8,7 +8,6 @@ class Discount(models.Model):
     create_at = models.DateTimeField(auto_now_add=True)
     start_date = models.DateTimeField(_('start date'))
     end_date = models.DateTimeField(_('end date'))
-    used_date = models.DateTimeField(_('used date'))
     code = models.CharField(
         _('code'),
         unique=True,
@@ -33,3 +32,15 @@ class PercentDiscount(Discount):
 
 class AmountDiscount(Discount):
     amount = models.IntegerField(_('amount'))
+
+class DiscountLog(models.Model):
+    used_date = models.DateTimeField(auto_now_add=True)
+    user = models.ForeignKey('accounts.User', verbose_name=_('user'), on_delete=models.CASCADE)
+    class Meta:
+        abstract = True
+
+class PercentDiscountLog(DiscountLog):
+    discount = models.ForeignKey(PercentDiscount, verbose_name=_('creator'), on_delete=models.CASCADE)
+
+class AmountDiscountLog(DiscountLog):
+    discount = models.ForeignKey(AmountDiscount, verbose_name=_('creator'), on_delete=models.CASCADE)
