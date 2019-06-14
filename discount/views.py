@@ -17,7 +17,7 @@ class DiscountPerm(LoginRequiredMixin):
 
         return super().dispatch(request, *args, **kwargs)
 
-class UseDiscoutPerm(LoginRequiredMixin):
+class UseDiscoutPerm(View):
     def dispatch(self, request, *args, **kwargs):
         user = User.objects.get(username=request.user) 
         if not user.has_perm('accounts.can_use_discount'):
@@ -54,7 +54,7 @@ class Discount(DiscountPerm, TemplateView):
     def get(self, request, *args, **kwargs):
         return self.post(request, *args, **kwargs)
     
-class UseDiscount(UseDiscoutPerm, TemplateView):
+class UseDiscount(LoginRequiredMixin, UseDiscoutPerm, TemplateView):
     precent_form = forms.PrecentUseDiscountForm
     amount_form = forms.AmountUseDiscountForm
     template_name = 'discount/use_discount.html'
