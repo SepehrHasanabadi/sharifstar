@@ -36,6 +36,7 @@
             "type": "python",
             "request": "launch",
             "program": "${workspaceFolder}/manage.py",
+            "pythonPath": "/Users/sepehr/Documents/freelancers-group/sharifstar/bin/python",
             "console": "integratedTerminal",
             "args": [
                 "runserver",

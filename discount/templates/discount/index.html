@@ -1,0 +1,10 @@
+<h1>Precent Form</h1>
+<form method="post">{% csrf_token %}
+    {{ precent_form }}
+    <input type="submit" value="Save">
+</form>
+<h1>Amount Form</h1>
+<form method="post">{% csrf_token %}
+    {{ amount_form }}
+<input type="submit" value="Save">
+</from>

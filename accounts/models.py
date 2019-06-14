@@ -1,6 +1,6 @@
 from django.db import models
 from django.utils.translation import gettext_lazy as _
-from django.contrib.auth.models import User as AuthUser
+from django.contrib.auth.models import User as AuthUser, Group
 from django.core.validators import RegexValidator
 
 
@@ -10,14 +10,12 @@ SCHOOL_CODE = "sch"
 OPERATOR_CODE = "opr"
 
 class User(AuthUser):
-
     USER_TYPE = [
         (STUDENT_CODE, "Student"),
         (PARENT_CODE, "Parent"),
         (SCHOOL_CODE, "School"),
         (OPERATOR_CODE, "Operator"),
-        ]
-        
+        ]   
     user_type = models.CharField(
         _('user type'),
         blank=False,
@@ -27,37 +25,41 @@ class User(AuthUser):
     )
 
 class NameModel(models.Model):
-    first_name = models.CharField(_('first name'), max_length=30, blank=True)
-    last_name = models.CharField(_('last name'), max_length=150, blank=True)
+    user = models.OneToOneField(User, on_delete=models.CASCADE, primary_key=True)
+    first_name = models.CharField(_('first name'), max_length=30, blank=False)
+    last_name = models.CharField(_('last name'), max_length=150, blank=False)
 
     class Meta:
         abstract = True 
 
 class CustomerModel(NameModel):
-    phone_number = models.CharField(_('phone number'), blank=True, max_length=16)
-    birth_date = models.DateTimeField(_('birth date'))
+    phone_number = models.CharField(_('phone number'), max_length=16, blank=False)
+    birth_date = models.DateTimeField(_('birth date'), blank=False)
 
 class Student(CustomerModel):
-    national_code = models.IntegerField(_('national code'))
+    national_code = models.IntegerField(_('national code'), blank=False)
+
+    class Meta:
+        permissions = [('student_discount', 'Student discount')]
 
     @staticmethod
     def get_code():
         return STUDENT_CODE
 
 class Parent(CustomerModel):
-    child_national_code = models.IntegerField(_('child national code'))
+    child_national_code = models.IntegerField(_('child national code'), blank=False)
 
     @staticmethod
     def get_code():
         return PARENT_CODE
 
 class School(models.Model):
-    name = models.CharField(_('name'), max_length=30, blank=True)
-    manager_name = models.CharField(_('manager name'), max_length=30, blank=True)
-    phone_number = models.CharField(_('phone number'), blank=True, max_length=16)
+    user = models.OneToOneField(User, on_delete=models.CASCADE, primary_key=True)
+    school_name = models.CharField(_('school name'), max_length=30, blank=False)
+    manager_name = models.CharField(_('manager name'), max_length=30, blank=False)
+    phone_number = models.CharField(_('phone number'), blank=False, max_length=16)
     identity = models.IntegerField(
-        _('phone number'),
-        blank=True,
+        _('Identity'),
         unique=True,
         help_text=_('Required. Has to be unique'),
         error_messages={
