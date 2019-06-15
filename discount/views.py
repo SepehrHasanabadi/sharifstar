@@ -20,9 +20,8 @@ class DiscountPerm(View):
 class UseDiscoutPerm(View):
     def dispatch(self, request, *args, **kwargs):
         user = User.objects.get(username=request.user) 
-        if not user.has_perm('accounts.can_use_discount'):
-            # return redirect(reverse_lazy('discount:index'))
-            pass
+        if not user.has_perm('discount.can_use_discount'):
+            return redirect(reverse_lazy('discount:index'))
 
         return super().dispatch(request, *args, **kwargs)
 

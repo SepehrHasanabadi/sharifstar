@@ -39,19 +39,16 @@ class CustomerModel(NameModel):
 class Student(CustomerModel):
     national_code = models.IntegerField(_('national code'), blank=False)
 
-    class Meta:
-        permissions = [('use_discount', 'Use discount')]
-
     @staticmethod
-    def get_code():
-        return STUDENT_CODE
+    def match_code(user_code):
+        return user_code == STUDENT_CODE
 
 class Parent(CustomerModel):
     child_national_code = models.IntegerField(_('child national code'), blank=False)
 
     @staticmethod
-    def get_code():
-        return PARENT_CODE
+    def match_code(user_code):
+        return user_code == PARENT_CODE
 
 class School(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE, primary_key=True)
@@ -74,8 +71,8 @@ class School(models.Model):
     )
 
     @staticmethod
-    def get_code():
-        return SCHOOL_CODE
+    def match_code(user_code):
+        return user_code == SCHOOL_CODE
 
 class Operator(NameModel):
     OPERATOR_TYPE = [
@@ -90,6 +87,6 @@ class Operator(NameModel):
     )
 
     @staticmethod
-    def get_code():
-        return OPERATOR_CODE
+    def match_code(user_code):
+        return user_code == OPERATOR_CODE
 

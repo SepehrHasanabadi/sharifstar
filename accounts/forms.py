@@ -25,8 +25,8 @@ class StudentForm(forms.ModelForm):
 
     @staticmethod
     def match_code(user_code):
-        return user_code == models.Student.get_code()
-
+        return models.Student.match_code(user_code)
+    
 class ParentForm(forms.ModelForm):
     class Meta:
         model = models.Parent
@@ -34,7 +34,7 @@ class ParentForm(forms.ModelForm):
 
     @staticmethod
     def match_code(user_code):
-        return user_code == models.Parent.get_code()
+        return models.Parent.match_code(user_code)
 
 class SchoolForm(forms.ModelForm):
     class Meta:
@@ -43,7 +43,7 @@ class SchoolForm(forms.ModelForm):
 
     @staticmethod
     def match_code(user_code):
-        return user_code == models.School.get_code()
+        return models.School.match_code(user_code)
 
 class OperatorForm(forms.ModelForm):
     class Meta:
@@ -52,4 +52,4 @@ class OperatorForm(forms.ModelForm):
 
     @staticmethod
     def match_code(user_code):
-        return user_code == models.Operator.get_code()
+        return models.Operator.match_code(user_code)

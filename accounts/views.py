@@ -44,17 +44,27 @@ class Information(LoginRequiredMixin, FormView):
             return forms.OperatorForm
 
     def form_valid(self, form):
+        user_type = self.kwargs['user_type']
         user = User.objects.get(username=self.request.user)
         obj = form.save(commit=False)
-        permission = Permission.objects.filter(codename='discount.can_view_discount').first()
-        if not permission:
-            content_type = ContentType.objects.get_for_model(Discount)
-            permission = Permission.objects.create(
+        content_type = ContentType.objects.get_for_model(Discount)
+        view_discount_perm = Permission.objects.filter(codename='can_view_discount', content_type=content_type).first()
+        if not view_discount_perm:
+            view_discount_perm = Permission.objects.create(
                 codename='can_view_discount',
                 name='can view discount',
                 content_type=content_type,
             )
-        user.user_permissions.add(permission)
+        if obj.match_code(user_type):
+            use_discount_perm = Permission.objects.create(
+                codename='can_use_discount',
+                name='can use discount',
+                content_type=content_type,
+            )
+            user.user_permissions.add(use_discount_perm)
+        user.user_permissions.add(view_discount_perm)
         obj.user = user
         obj.save()
+        
+
         return redirect(reverse_lazy('discount:index'))
