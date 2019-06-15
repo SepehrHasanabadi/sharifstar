@@ -66,5 +66,4 @@ class Information(LoginRequiredMixin, FormView):
         obj.user = user
         obj.save()
         
-
         return redirect(reverse_lazy('discount:index'))

@@ -8,6 +8,7 @@ from django.urls import reverse_lazy
 
 from . import forms
 from accounts.models import User
+from . import models
 
 class DiscountPerm(View):
     def dispatch(self, request, *args, **kwargs):
@@ -77,3 +78,52 @@ class UseDiscount(LoginRequiredMixin, UseDiscoutPerm, TemplateView):
 
     def get(self, request, *args, **kwargs):
         return self.post(request, *args, **kwargs)
+
+class DiscountViewItem:
+    def __init__(self, code, date_generated, generator, used_count, remain_count, period_expiration):
+        self.code = code
+        self.date_generated = date_generated
+        self.generator = generator
+        self.used_count = used_count
+        self.remain_count = remain_count
+        self.period_expiration = period_expiration
+    
+class AdminReport(TemplateView):
+    template_name = 'discount/list_discount.html'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['percent_discount'] = self.get_percent_discounts_items(models.PercentDiscount.objects.all()) 
+        context['amount_discount'] = self.get_amount_discounts_items(models.AmountDiscount.objects.all())
+        return context
+
+    def get_percent_discounts_items(self, discounts):
+        result = []
+        for discount in discounts:
+            remain_count = models.PercentDiscountLog.objects.filter(discount__code=discount.code).count()
+            result.append(DiscountViewItem(discount.code, discount.create_at, discount.creator,\
+                discount.count_expiration, remain_count, str(discount.start_date) + ' to ' + str(discount.end_date)))
+        return result
+
+    def get_amount_discounts_items(self, discounts):
+        result = []
+        for discount in discounts:
+            remain_count = models.PercentDiscountLog.objects.filter(discount__code=discount.code).count()
+            result.append(DiscountViewItem(discount.code, discount.create_at, discount.creator,\
+                discount.count_expiration, remain_count, str(discount.start_date) + ' to ' + str(discount.end_date)))
+        return result
+
+class ListDiscount(TemplateView):
+    template_name = 'discount/student_discount.html'
+
+class ListPercentDiscount(ListDiscount):
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['students'] = models.PercentDiscountLog.objects.filter(discount__code=kwargs['code']).values('user__username')
+        return context
+    
+class ListAmountDiscount(ListDiscount):
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['students'] = models.AmountDiscountLog.objects.filter(discount__code=kwargs['code']).values('user__username')
+        return context

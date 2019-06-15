@@ -1,0 +1,31 @@
+<table>
+    <tr>
+        <th>Discount Code</th>
+        <th>Date Generated</th>
+        <th>Generator</th>
+        <th>Used count</th>
+        <th>Remain count</th>
+        <th>Period of expiration</th>
+        
+    </tr>
+    {% for item in percent_discount %}
+    <tr> 
+        <td><a href="{% url 'discount:percent_users' code=item.code %}">{{ item.code }}</a></td>
+        <td>{{ item.date_generated }}</td>
+        <td>{{ item.generator.username }}</td>
+        <td>{{ item.used_count }}</td>
+        <td>{{ item.remain_count }}</td>
+        <td>{{ item.period_expiration }}</td>
+    </tr>
+    {% endfor %}
+    {% for item in amount_discount %}
+    <tr> 
+        <td><a href="{% url 'discount:amount_users' code=item.code %}">{{ item.code }}</a></td>
+        <td>{{ item.date_generated }}</td>
+        <td>{{ item.generator.username }}</td>
+        <td>{{ item.used_count }}</td>
+        <td>{{ item.remain_count }}</td>
+        <td>{{ item.period_expiration }}</td>
+    </tr>
+    {% endfor %}
+</table>
