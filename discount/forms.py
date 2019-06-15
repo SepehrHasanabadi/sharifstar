@@ -17,21 +17,27 @@ class AmountDiscountForm(forms.ModelForm):
 class PrecentUseDiscountForm(forms.Form):
     code = forms.CharField(label='Percent Discount Code')
 
+    def __init__(self, *args, **kwargs):
+        self.user = kwargs.pop('user', None)
+        super(PrecentUseDiscountForm, self).__init__(*args, **kwargs)
+
     def clean_code(self):
         try:
             code = self.code_text = self.cleaned_data["code"]
             discount = models.PercentDiscount.objects.get(code=code)
-            if models.PercentDiscount.objects.filter(start_date__gt=datetime.now(), end_date__lt=datetime.now()):
+            if models.PercentDiscountLog.objects.filter(discount__code=code, user=self.user).exists():
+                 raise forms.ValidationError('you used', code='you_used')   
+            if models.PercentDiscount.objects.filter(start_date__lt=datetime.now(), end_date__gt=datetime.now()):
                 raise forms.ValidationError('date expired', code='date_expired')
-            if discount.count_expiration <= models.PrecentDiscountLog.objects.filter(discount__code=code).count():
+            if discount.count_expiration <= models.PercentDiscountLog.objects.filter(discount__code=code).count():
                 raise forms.ValidationError('count expired', code='count_expired') 
         except models.PercentDiscount.DoesNotExist:
             raise forms.ValidationError('Not exists', code='not_exists')
 
-    def save(self, user, commit=False):
-        amount = models.PrecentDiscountLog()
+    def save(self, commit=False):
+        amount = models.PercentDiscountLog()
         amount.discount = models.PercentDiscount.objects.get(code=self.code_text)
-        amount.user = user
+        amount.user = self.user
         amount.save()
 
 class AmountUseDiscountForm(forms.Form):

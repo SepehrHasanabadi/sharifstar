@@ -46,17 +46,14 @@ class Information(LoginRequiredMixin, FormView):
     def form_valid(self, form):
         user = User.objects.get(username=self.request.user)
         obj = form.save(commit=False)
-        content_type = ContentType.objects.get_for_model(Discount)
-        permission = Permission.objects.get(
-            codename='can_view_discount',
-            content_type=content_type,
-        )
+        permission = Permission.objects.filter(codename='discount.can_view_discount').first()
         if not permission:
+            content_type = ContentType.objects.get_for_model(Discount)
             permission = Permission.objects.create(
-            codename='can_view_discount',
-            name='can view discount',
-            content_type=content_type,
-        )
+                codename='can_view_discount',
+                name='can view discount',
+                content_type=content_type,
+            )
         user.user_permissions.add(permission)
         obj.user = user
         obj.save()

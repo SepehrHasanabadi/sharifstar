@@ -9,7 +9,7 @@ from django.urls import reverse_lazy
 from . import forms
 from accounts.models import User
 
-class DiscountPerm(LoginRequiredMixin):
+class DiscountPerm(View):
     def dispatch(self, request, *args, **kwargs):
         user = User.objects.get(username=request.user) 
         if not user.has_perm('discount.can_view_discount'):
@@ -26,7 +26,7 @@ class UseDiscoutPerm(View):
 
         return super().dispatch(request, *args, **kwargs)
 
-class Discount(DiscountPerm, TemplateView):
+class Discount(LoginRequiredMixin, DiscountPerm, TemplateView):
     precent_form = forms.PrecentDiscountForm
     amount_form = forms.AmountDiscountForm
     template_name = 'discount/index.html'
@@ -61,7 +61,7 @@ class UseDiscount(LoginRequiredMixin, UseDiscoutPerm, TemplateView):
 
     def post(self, request):
         post_data = request.POST or None
-        precent_form = self.precent_form(post_data, prefix='precent')
+        precent_form = self.precent_form(post_data, prefix='precent', user=User.objects.get(username=self.request.user))
         amount_form = self.amount_form(post_data, prefix='amount')
 
         context = self.get_context_data(precent_form=precent_form, amount_form=amount_form)
@@ -74,7 +74,7 @@ class UseDiscount(LoginRequiredMixin, UseDiscoutPerm, TemplateView):
         return self.render_to_response(context)
     
     def form_save(self, form):
-        return form.save(user=User.objects.get(username=self.request.user), commit=True)
+        return form.save(commit=True)
 
     def get(self, request, *args, **kwargs):
         return self.post(request, *args, **kwargs)
